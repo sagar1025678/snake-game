@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Snake Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        #gameCanvas {
+            border: 2px solid black;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+        .popup button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="startPopup" class="popup">
+        <p>Welcome to childhood nostalgia! It's me, Sagar Sunar, who is gonna provide you the experience. Hope you will enjoy this!</p>
+        <button onclick="startGame()">Start</button>
+    </div>
+    
+    <div id="deathPopup" class="popup">
+        <p>You made a mistake! What would you like to do?</p>
+        <button onclick="restartGame()">Play from Beginning</button>
+        <button onclick="kissSagar()">Kiss Sagar</button>
+    </div>
+
+    <div id="kissPopup" class="popup">
+        <p>Are you only and beautiful Sagar wife?</p>
+        <button onclick="resumeGame(true)">Yes</button>
+        <button onclick="resumeGame(false)">No</button>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startPopup = document.getElementById('startPopup');
+        const deathPopup = document.getElementById('deathPopup');
+        const kissPopup = document.getElementById('kissPopup');
+
+        let snake = [{ x: 200, y: 200 }];
+        let direction = { x: 0, y: 0 };
+        let food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
+        let speed = 100;
+        let gameInterval;
+        
+        function startGame() {
+            startPopup.style.display = 'none';
+            resetGame();
+            gameInterval = setInterval(updateGame, speed);
+        }
+
+        function resetGame() {
+            snake = [{ x: 200, y: 200 }];
+            direction = { x: 0, y: 0 };
+            food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
+            speed = 100;
+        }
+
+        function updateGame() {
+            let head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            
+            if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                clearInterval(gameInterval);
+                deathPopup.style.display = 'block';
+                return;
+            }
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
+                speed = Math.max(50, speed - 5);
+                clearInterval(gameInterval);
+                gameInterval = setInterval(updateGame, speed);
+            } else {
+                snake.pop();
+            }
+
+            drawGame();
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, 20, 20);
+            
+            ctx.fillStyle = 'green';
+            snake.forEach(segment => ctx.fillRect(segment.x, segment.y, 20, 20));
+        }
+
+        function restartGame() {
+            deathPopup.style.display = 'none';
+            startGame();
+        }
+
+        function kissSagar() {
+            deathPopup.style.display = 'none';
+            kissPopup.style.display = 'block';
+        }
+
+        function resumeGame(isWife) {
+            kissPopup.style.display = 'none';
+            if (isWife) {
+                gameInterval = setInterval(updateGame, speed);
+            } else {
+                startGame();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) direction = { x: 0, y: -20 };
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) direction = { x: 0, y: 20 };
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) direction = { x: -20, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) direction = { x: 20, y: 0 };
+                    break;
+            }
+        });
+
+        startPopup.style.display = 'block';
+    </script>
+</body>
+</html>
